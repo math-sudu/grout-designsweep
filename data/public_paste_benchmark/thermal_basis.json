@@ -1,0 +1,40 @@
+{
+  "volume": {
+    "cement_density_kg_m3": 3150,
+    "water_density_kg_m3": 998.2,
+    "air_volume_fraction": 0,
+    "source": "Aalborg Portland, White Concrete Technology, p4: absolute cement density 3150 kg/m3; https://www.aalborgportland.com.my/wp-content/uploads/info_white_concrete_technology.pdf",
+    "role": "Product-level density estimate and additive initial constituent volumes; R033 specimens were vibrated to remove air. Neither fresh density nor air fraction was measured for these batches. Water density is the 20 C liquid value. The same initial fill volume is used for mass comparison."
+  },
+  "thermal_properties": {
+    "cement_cp_j_kgk": 750,
+    "water_cp_j_kgk": 4180,
+    "paste_conductivity_w_mk": 1.0,
+    "paste_cp_factor": 1.0,
+    "source": "Bentz (2007), doi:10.1617/s11527-006-9206-9, sections 3.1-3.2, Eq (1)-(2), Fig 4; full text https://www.researchgate.net/publication/225639675_Transient_plane_source_measurements_of_the_thermal_properties_of_hydrating_cement_pastes",
+    "role": "Other Portland cement pastes: mixture heat capacity is the fresh-paste upper estimate; sealed hydration lowers it. The factor 0.74 is the asymptotic lower envelope of Eq (2), not an inferred absolute hydration fraction. Conductivity 0.77-1.16 W/m/K spans prior measurements summarized there. Use these as sensitivity inputs, not measured W32/W40/W48 properties.",
+    "lining_conductivity_w_mk": 1.8,
+    "lining_capacity_j_m3k": 2200000,
+    "lining_role": "Structural-concrete estimates, varied as heat-sink assumptions."
+  },
+  "temperature_response": {
+    "activation_energy_j_mol": 40000,
+    "sensitivity_j_mol": [30000, 50000],
+    "temperature_ceiling_c": 40,
+    "source": "Granja et al. (2023), doi:10.3151/jact.21.803, Table 6: paste early-stage values 37.32-39.58 kJ/mol. This separate CEM I w/c=0.54 experiment supplies the nominal scale, not W32/W40/W48 calibration.",
+    "role": "Local Arrhenius rate scaling is a working model; the 30-50 kJ/mol bracket tests transfer sensitivity and is not a confidence interval. Evaluation stops at the selected 40 C temperature scope. The returned endpoint censors later response queries."
+  },
+  "boundaries": {
+    "air_h_w_m2k": 8,
+    "soil_h_w_m2k": 16,
+    "role": "Actual coefficients at lining intrados and paste/soil interface, without the legacy factor of two. The soil reservoir is an effective thermal boundary, not an atmospheric film or a measured local temperature. Coefficient variations test its heat-removal influence. Boundary and initial temperatures in the calculation are declared scenarios, not site records."
+  },
+  "initial_state": "The common R033 observation start at age 1.68637216 h supplies nonzero stiffness and q=0 observed heat increment. This is a supported calculation initial state, not evidence that such already-stiff paste can be pumped. A later observed reference age or a previous q/T field can be passed explicitly; no mixing-to-observation heat is imputed.",
+  "design_queries": {
+    "source": "scripts/run_support_queries.py; results/support_design/query_runs.csv",
+    "inputs": "Three discrete recipes; supported uniform reference-age states; independent initial paste/lining temperature and soil reservoir temperature. Thirteen declared cases use 16-30 C and initial ages 1.686/3/6 h. Air remains at 20 C after its negligible short-window influence was checked in the representative calculations.",
+    "thermal_assumptions": "Eleven evaluated parameter scenarios, shared with run_paste_support.py. Finite-scenario agreement, disagreement and domain censoring are reported separately. No probability distribution or continuous parameter envelope is inferred.",
+    "spatial_response_probe": "The maximum absolute table/radial-FE difference in profile_fe_checks.csv, query_profile_fe_checks.csv and design_profile_fe_checks.csv defines a symmetric response perturbation for a separate sensitivity query. This observed scale is not a certified error bound; actual field checks remain available at their named conditions.",
+    "method": "Integrate each coupled q/T trajectory once, then reuse its radial-field section response for all common demands and deadlines. The main design uses the 363 common-origin trajectories, excluding the separate age_3 and age_6 initializations."
+  }
+}

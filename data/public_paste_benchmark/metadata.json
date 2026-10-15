@@ -1,0 +1,38 @@
+{
+  "source_ref": "R033",
+  "source_doi": "10.1016/j.cemconres.2020.106007",
+  "source_pdf": "references/papers/R033_dunant_2020/source.pdf",
+  "source_url": "https://www.repository.cam.ac.uk/items/863e7f20-51e8-4e47-9caf-457302e022b8",
+  "source_pdf_url": "https://www.repository.cam.ac.uk/bitstreams/a656964c-d24d-47c7-8c76-27a54a8f49a5/download",
+  "material": "One batch of Aalborg Portland white cement and water",
+  "reference_temperature_c": 20.0,
+  "preparation": "Water added to cement; mixed at 1600 rpm for 120 s. EMM-ARM moulds vibrated to remove air; monitoring began within 20 min. Moist sealed curing.",
+  "preparation_pdf_pages": [11, 12, 17],
+  "recipes": {
+    "W32": {"cement_kg": 1.0, "water_kg": 0.32},
+    "W40": {"cement_kg": 1.0, "water_kg": 0.40},
+    "W48": {"cement_kg": 1.0, "water_kg": 0.48}
+  },
+  "recipe_basis": "Measured water/cement ratios, expressed per 1 kg dry cement; not kg per cubic metre",
+  "heat_flow": {
+    "file": "heat_flow.csv",
+    "figure": 5,
+    "pdf_page": 18,
+    "unit": "W/kg dry cement (numerically equal to the plotted mW/g)",
+    "method": "Isothermal TAM Air calorimetry at 20 C"
+  },
+  "modulus": {
+    "file": "modulus.csv",
+    "figure": 10,
+    "pdf_page": 22,
+    "unit": "Pa",
+    "method": "EMM-ARM low-frequency flexural resonance; not an ultrasound modulus or a direct compression test",
+    "replicates": "Two runs per paste; the published figure contains one representative curve per recipe, not separate replicate records"
+  },
+  "extraction": "Published PDF vector paths; line vertices retained and cubic Bezier segments sampled in 16 subdivisions; axes calibrated from their tick marks. W32/W40 initial heat-flow spikes double back horizontally in the artwork: extraction starts at the subsequent single-valued part. The W32 modulus segment crossing the zero-age tick is clipped at that tick by interpolation. These are figure-derived values, not raw instrument records or extra replicates. Rebuild with scripts/prepare_paste_benchmark.py (requires PyMuPDF).",
+  "reaction_coordinate": "Heat increment per kg dry cement since the earliest common age supported by both figures for all three recipes. The unknown earlier heat is not set to zero total hydration.",
+  "heat_normalization": "No absolute degree of hydration is inferred: the accepted manuscript gives 558 J/g in equation (4) on PDF p15 and 588 J/g in section 4.1 on p17.",
+  "temperature_dependence": "These three recipes were measured at 20 C only. Granja et al. (2023), doi:10.3151/jact.21.803, provides a separate CEM I 52.5N, w/c=0.54 temperature benchmark; it is not a measurement of the W32/W40/W48 activation energy.",
+  "volumetric_properties": "Fresh density, air fraction, conductivity and heat capacity are not assigned by this data product. Cement mass fraction is computed directly from the measured recipe; volume-based dosage needs a separate density basis.",
+  "application": "Public cement-paste material benchmark for the support-calculation method."
+}

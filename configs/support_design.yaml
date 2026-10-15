@@ -1,0 +1,21 @@
+# Dimensions: Liu et al. (2021), doi:10.1016/j.tust.2021.103857, section 2.1.
+geometry:
+  excavation_diameter_m: 12.04
+  lining_outer_diameter_m: 11.60
+  lining_inner_diameter_m: 10.50
+  crown_cover_m: 19.5
+  domain_width_m: 60.0
+  domain_height_m: 60.0
+
+elasticity:
+  ground_modulus_pa: 85000000.0
+  lining_modulus_pa: 20000000000.0
+  poisson_ratio: 0.3
+  inward_traction_pa: -64068.0
+
+mesh:
+  size_m: 2.0
+  near_annulus_size_m: 0.11
+
+response:
+  table: results/support_design/reference_response.npz
