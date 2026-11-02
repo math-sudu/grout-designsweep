@@ -1,1 +1,1 @@
-"""Material-time design for the common tunnel-support demand."""
+"""Hydration-dependent support fields and construction decisions."""

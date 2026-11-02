@@ -1,121 +1,101 @@
-# Cement-time frontiers for tunnel support
+# Grout selection under staged loading
 
-Reproduction code for *Cement-time frontiers for tunnel support using
-hydration-dependent stiffness*. Three white-cement pastes (W32/W40/W48) supply
-the paired calorimetry and modulus benchmark. The code constructs loading
-events, minimum-cement frontiers, adjacent time costs and reaction requirements
-for a common section-compliance demand.
+Code and digitized input data for **Grout selection for shield tunnels under
+staged loading using physics-informed neural networks**.
 
-## Environment
+The calculation combines measured paste hardening, physics-informed incremental
+displacement and stress responses, and linear programming. It selects a material
+whose loading schedule satisfies intermediate pressure requirements, the final
+pressure and surface-displacement bounds. The supplied W32, W40 and W48 inputs
+are paired calorimetry and Young's modulus curves from
+[Dunant et al. (2020)](https://doi.org/10.1016/j.cemconres.2020.106007).
 
-Use Python 3.10 or newer for the material model, postprocessing and plots, and
-Docker with Linux containers for the finite-element calculations. Run every
-command from this repository root.
+## Installation
+
+Use Python 3.10 or newer and run commands from this directory:
 
 ```text
 python -m pip install -e ".[test]"
-docker build -t grout-support-fe .
 ```
 
-The Dockerfile pins the FE image by digest and adds PyYAML. It contains Python
-3.12.3, DOLFINx 0.11.0.post0, Gmsh 4.15.2, NumPy 2.4.6 and SciPy 1.17.1.
-The host workflow was run with Python 3.13, NumPy 2.4.4, SciPy 1.16.2, pandas 2.3.3,
-Matplotlib 3.10.6 and PyMuPDF 1.27.2.2. Figure export requires an installed
-Times New Roman font; STIX math fonts come with Matplotlib. The font files are
-not included. The bundled Origin-style exporter and its JSON configuration
-come from GeoSkills commit `c274d819`; they have no dependency on that checkout.
+The calculations used Python 3.13.7, PyTorch 2.8.0, NumPy 2.4.4, SciPy 1.16.2,
+pandas 2.3.3 and PyMuPDF 1.27.2.2. Thermal training can use CPU or CUDA;
+mechanical least-squares calculations use CPU.
 
-## Reproduce the study
+## Inputs
 
-1. Download the public accepted manuscript and extract its vector curves:
+`data/public_paste_benchmark/heat_flow.csv` and `modulus.csv` contain the curves
+digitized from Figures 5 and 10 of the accepted manuscript. The accompanying
+metadata records their units and extraction method. The original article is
+available through [Cambridge Apollo](https://doi.org/10.17863/CAM.50607).
+To repeat the extraction:
 
-   ```text
-   python scripts/prepare_paste_benchmark.py --download
-   ```
+```text
+python scripts/prepare_paste_benchmark.py --download
+```
 
-   This obtains [Dunant et al. (2020)](https://doi.org/10.1016/j.cemconres.2020.106007)
-   from [Cambridge Apollo](https://doi.org/10.17863/CAM.50607). Figures 5 and 10
-   produce `data/public_paste_benchmark/heat_flow.csv` and `modulus.csv`.
-   These are figure-derived inputs, with extraction details in `metadata.json`.
-   The third-party PDF stays under its repository license and is downloaded
-   separately. `thermal_basis.json` records the physical input sources and
-   transfer assumptions. Section dimensions follow
-   [Liu et al. (2021)](https://doi.org/10.1016/j.tust.2021.103857).
+`configs/support_design.yaml` supplies the geometry and material constants.
+`configs/support_handover.yaml` specifies loading times and displacement bounds.
+`configs/pinn_support.json` and the material-specific `configs/W32_event.json`,
+`W40_event.json` and `W48_event.json` contain neural and numerical settings.
 
-2. Rebuild the uniform-annulus FE table directly from `configs/support_design.yaml`:
+Elapsed assessment time begins at the common measured reference age of
+1.68637216 h. The prescribed four-hour loading window starts from that state.
+Mechanical activation occurs at the first pressure withdrawal. Further loading
+retains that activation reference and the displacement and stress already
+accumulated.
 
-   ```powershell
-   pwsh -NoProfile -File scripts/run_in_dolfinx.ps1 scripts/prepare_support_response.py
-   ```
+## Reproduce the calculations
 
-   On a POSIX shell, the equivalent container invocation is:
+Train and evaluate each material, replacing `W32` with `W40` and `W48`:
 
-   ```sh
-   docker run --rm -v "$PWD:/work" -w /work grout-support-fe bash -lc \
-     'export PYTHONPATH="/work/src:$PYTHONPATH"; python3 scripts/prepare_support_response.py'
-   ```
+```text
+python scripts/train_pinn_thermal.py --mix W32 --device cpu
+python scripts/check_pinn_thermal.py --directory results/pinn_support/W32/thermal_age
+python scripts/run_pinn_event.py --mix W32
+python scripts/run_pinn_pressure.py --mix W32
+python scripts/run_pinn_design.py --mix W32 --continuous
+```
 
-   Substitute the Python script and arguments in that invocation for subsequent
-   FE steps. Both the image and PowerShell entry set `OMP_NUM_THREADS=1` and
-   `OPENBLAS_NUM_THREADS=1`. This step produces the 143-point
-   `results/support_design/reference_response.npz`, including 20 independent
-   check points. No previous FE arrays or fitted pressure records are required;
-   compliance is normalized by the specified linear traction.
+Once all three materials are available, construct the initially loaded W40
+state and evaluate the loading schedules:
 
-3. Generate thermal query inputs and solve the radial stiffness fields:
+```text
+python scripts/check_pinn_history.py --continuous-pressure
+python scripts/run_pinn_design.py --qualification
+python scripts/run_pinn_plans.py
+python scripts/check_pinn_decisions.py
+```
 
-   ```text
-   python scripts/run_support_queries.py
-   pwsh -NoProfile -File scripts/run_in_dolfinx.ps1 scripts/run_radial_support.py --workers 8
-   ```
+These commands create models and calculation records under `results/pinn_support/`.
+The last command computes the independent, richer incremental responses used
+to assess the material choices and further loading.
 
-   Choose a worker count that fits available CPU and memory. The main design
-   uses 363 common-origin trajectories (11 temperature cases, three pastes,
-   11 thermal parameter scenarios). `query_runs.csv` also retains the separate
-   3 h/6 h reference-state cases; radial selection excludes those cases.
-   `radial_histories.csv`, `radial_attainment.csv` and `radial_runs.csv` contain
-   the field responses, 41-demand events and inputs. Add `--resume` to continue
-   an interrupted radial run. A selected run such as `--case reference
-   --scenario nominal` overwrites these files unless `--resume` is supplied;
-   use the complete run for the full design tables.
+For a final pressure of 100 kPa and withdrawal-induced settlement limited to
+0.220 mm, the cumulative fractions 0.2/0.5/1 at 0.37/1.73/4 h select W32.
+Moving the intermediate times to 1.73/3.1 h selects W40. At equal initial fill
+volume, W40 contains 174.9 kg/m3 less cement. Further loading of W40 retains
+the 20% pressure applied at 0.37 h and applies the remaining pressure within
+the original displacement bounds.
 
-4. Reconstruct the paper's design outputs and four figures:
-
-   ```text
-   python scripts/run_support_events.py
-   python scripts/run_support_reaction.py
-   python scripts/run_support_updates.py
-   python scripts/plot_support_paper.py
-   ```
-
-   `event_designs.csv` contains 55,022 grid decisions;
-   `cement_time_frontier.csv` contains 2,610 intervals with explicit endpoint
-   inclusion; `cement_time_tradeoffs.csv` contains 985 adjacent transitions.
-   `uniform_reaction_requirements.csv` and `attainment_reaction.csv` report
-   heat requirements; `state_updates.csv` reports fixed-material clock updates.
-   Figures are written as PDF and editable SVG under `paper/figures/`.
-   Generated outputs are recreated locally and excluded from Git.
-
-For the reference 2.2 micrometres/kPa demand, nominal radial attainment is
-1.642586/2.396481/3.590246 h for W32/W40/W48. The adjacent cement savings are
-174.9/139.8 kg per initial cubic metre for 0.754/1.194 h additional time.
-With paste at 16 degrees C and lining/soil at 30 degrees C, all-scenario
-selection at 4 h is W40; W48 becomes available at 4.005554 h.
-
-## Checks and additional calculations
+Run the supplied tests with:
 
 ```text
 python -m pytest tests -q
-pwsh -NoProfile -File scripts/run_in_dolfinx.ps1 scripts/check_support_profiles.py --critical-refinement
 ```
 
-Run the tests after generating the curve CSVs and response table. They cover
-the reaction-coordinate inverse, initial-state continuation, event feasibility,
-radial crossing interpolation and frontier endpoints. The critical refinement
-checks the cold-paste/warm-surroundings W48 decision at 4 h on a finer mesh.
+## Method references
 
-`python scripts/run_paste_support.py` recreates the representative temperature
-histories used during method development. `check_support_profiles.py` uses
-those outputs for its default checks, or the query outputs with
-`--initial-state-queries` and `--design-decisions`. These diagnostics are separate
-from the main figure-generation sequence above.
+- [Liu et al. (2021)](https://doi.org/10.1016/j.tust.2021.103857): section
+  geometry and pressure-support withdrawal sequence.
+- [Dong and Li (2021)](https://doi.org/10.1016/j.cma.2021.114129): fixed neural
+  features and least-squares training.
+- [Harandi et al. (2024)](https://doi.org/10.1002/nme.7388): mixed field approximation.
+- [Galitz and Grasley (2016)](https://doi.org/10.1617/s11527-015-0576-8):
+  solidification history and its nonrelaxing elastic limit.
+
+Each material's spatial features are combined with a cubic time basis, with
+the product coefficients trained jointly along its measured hardening path.
+Evaluating the trained coefficients at a proposed application time supplies a
+new incremental response. The solidification law retains previous responses,
+and linear programming allocates the pressure still to be applied.

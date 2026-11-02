@@ -1,0 +1,43 @@
+{
+  "mix_id": "W40",
+  "seed": 1729,
+  "device": "cuda",
+  "event": {
+    "degree": 3,
+    "continuity": 0,
+    "break_step_h": 0.125,
+    "quadrature_order": 4,
+    "linear_rtol": 1e-13
+  },
+  "pressure": {
+    "sector_angle_deg": 62.5,
+    "angular_modes": 12,
+    "reduction_factors": [1.0, 0.8, 0.5, 0.2],
+    "source_doi": "10.1016/j.tust.2021.103857"
+  },
+  "mechanics": {
+    "seed": 2718,
+    "radial_neurons": {"soil": 18, "paste": 8, "lining": 8},
+    "angular_modes": 10,
+    "domain_points": {"soil": 2200, "paste": 850, "lining": 850},
+    "boundary_points": 192,
+    "domain_weight": {"soil": 20.0, "paste": 1.0, "lining": 0.2},
+    "interface_weight": 30.0,
+    "boundary_weight": 3.0,
+    "svd_cutoff": 1e-11
+  },
+  "thermal": {
+    "state_representation": "equivalent_age",
+    "end_time_h": 4.0,
+    "width": 32,
+    "depth": 3,
+    "domain_points": 768,
+    "boundary_points": 192,
+    "adam_steps": 4000,
+    "lbfgs_steps": 2000,
+    "learning_rate": 0.001,
+    "temperature_scale_k": 15.0,
+    "heat_scale_j_kg": 40000.0,
+    "flux_scale_w_m2": 75.0
+  }
+}

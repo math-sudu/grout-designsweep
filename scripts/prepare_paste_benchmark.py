@@ -16,7 +16,7 @@ import numpy as np
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "references/papers/R033_dunant_2020/source.pdf"
+SOURCE = ROOT / "references/papers/dunant_2020/source.pdf"
 OUTPUT = ROOT / "data/public_paste_benchmark"
 
 

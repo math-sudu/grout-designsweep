@@ -5,8 +5,6 @@ __pycache__/
 .pytest_cache/
 /build/
 /dist/
-/results/
 /paper/
-/figures/
 /references/
-data/public_paste_benchmark/*.csv
+/results/

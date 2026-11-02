@@ -11,11 +11,3 @@ elasticity:
   ground_modulus_pa: 85000000.0
   lining_modulus_pa: 20000000000.0
   poisson_ratio: 0.3
-  inward_traction_pa: -64068.0
-
-mesh:
-  size_m: 2.0
-  near_annulus_size_m: 0.11
-
-response:
-  table: results/support_design/reference_response.npz

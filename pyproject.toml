@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "grout-designsweep"
 version = "0.1.0"
-description = "Cement-time frontiers for tunnel support using hydration-dependent stiffness"
+description = "Physics-informed grout selection under staged loading"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -15,10 +15,13 @@ dependencies = [
   "pymupdf",
   "pyyaml",
   "scipy",
+  "torch",
+  "threadpoolctl",
 ]
 
 [project.optional-dependencies]
 test = ["pytest"]
+paper = ["python-docx"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
